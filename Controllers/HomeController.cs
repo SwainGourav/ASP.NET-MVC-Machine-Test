@@ -1,158 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ASP.NET_MVC_Machine_Test.Models;
-using ASP.NET_MVC_Machine_Test.ViewModels;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
 
 namespace ASP.NET_MVC_Machine_Test.Controllers
 {
-    public class ProductController : Controller // Add inheritance
+    public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private const int PageSize = 10;
-
-        public ProductController(ApplicationDbContext context)
+        public IActionResult Index()
         {
-            _context = context;
-        }
-
-       
-        public async Task<IActionResult> Index(int page = 1)
-        {
-            var products = await _context.Products
-                .Include(p => p.Category)
-                .Select(p => new ProductListViewModel
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.Category.CategoryName
-                })
-                .ToListAsync();
-
-            var pagedProducts = new PagedProductList
-            {
-                Products = products.Skip((page - 1) * PageSize).Take(PageSize).ToList(),
-                CurrentPage = page,
-                TotalPages = (int)Math.Ceiling(products.Count / (double)PageSize),
-                PageSize = PageSize,
-                TotalCount = products.Count
-            };
-
-            return View(pagedProducts);
-        }
-
-     
-        public async Task<IActionResult> Create()
-        {
-            ViewBag.Categories = await _context.Categories.ToListAsync();
             return View();
         }
 
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductName,CategoryId")] Product product)
+        public IActionResult Privacy()
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Categories = await _context.Categories.ToListAsync();
-            return View(product);
+            return View();
         }
 
-       
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Test()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            ViewBag.Categories = await _context.Categories.ToListAsync();
-            return View(product);
-        }
-
-        
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,CategoryId")] Product product)
-        {
-            if (id != product.ProductId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.ProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Categories = await _context.Categories.ToListAsync();
-            return View(product);
-        }
-
-        
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null) 
-            {
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.ProductId == id);
+            return Content("Application is working! Go to /product to see products.");
         }
     }
 }
