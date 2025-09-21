@@ -18,7 +18,7 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             _context = context;
         }
 
-        // GET: Product
+       
         public async Task<IActionResult> Index(int page = 1)
         {
             var products = await _context.Products
@@ -44,14 +44,14 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             return View(pagedProducts);
         }
 
-        // GET: Product/Create
+     
         public async Task<IActionResult> Create()
         {
             ViewBag.Categories = await _context.Categories.ToListAsync();
             return View();
         }
 
-        // POST: Product/Create
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductName,CategoryId")] Product product)
@@ -66,7 +66,7 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             return View(product);
         }
 
-        // GET: Product/Edit/5
+       
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -83,7 +83,7 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             return View(product);
         }
 
-        // POST: Product/Edit/5
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,CategoryId")] Product product)
@@ -117,7 +117,7 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             return View(product);
         }
 
-        // GET: Product/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,13 +136,13 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
             return View(product);
         }
 
-        // POST: Product/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var product = await _context.Products.FindAsync(id);
-            if (product != null) // Add null check
+            if (product != null) 
             {
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
