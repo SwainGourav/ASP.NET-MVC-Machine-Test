@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using ASP.NET_MVC_Machine_Test.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
 
 namespace ASP.NET_MVC_Machine_Test.Controllers
 {
-    public class CategoryController : Controller // Add inheritance
+    public class CategoryController : Controller
     {
         private readonly ApplicationDbContext _context;
 
@@ -32,12 +34,56 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryName")] Category category)
         {
+            // DEBUG: Check ModelState before validation
+            Console.WriteLine("=== MODEL STATE DEBUG ===");
+            Console.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+
+            // Log all validation errors
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("Validation Errors Found:");
+                foreach (var key in ModelState.Keys)
+                {
+                    var state = ModelState[key];
+                    if (state.Errors.Count > 0)
+                    {
+                        Console.WriteLine($"- {key}:");
+                        foreach (var error in state.Errors)
+                        {
+                            Console.WriteLine($"  - {error.ErrorMessage}");
+                        }
+                    }
+                }
+
+                // Add errors to ViewData to display on page
+                var errorMessages = new List<string>();
+                foreach (var state in ModelState.Values)
+                {
+                    foreach (var error in state.Errors)
+                    {
+                        errorMessages.Add(error.ErrorMessage);
+                    }
+                }
+                ViewData["ValidationErrors"] = errorMessages;
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    Console.WriteLine($"Attempting to save category: {category.CategoryName}");
+                    _context.Add(category);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine("Category saved successfully!");
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Database save error: {ex.Message}");
+                    ModelState.AddModelError("", "Error saving to database: " + ex.Message);
+                }
             }
+
             return View(category);
         }
 
@@ -114,7 +160,7 @@ namespace ASP.NET_MVC_Machine_Test.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var category = await _context.Categories.FindAsync(id);
-            if (category != null) // Add null check
+            if (category != null)
             {
                 _context.Categories.Remove(category);
                 await _context.SaveChangesAsync();

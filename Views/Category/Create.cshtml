@@ -6,14 +6,64 @@
 
 <h2>Create Category</h2>
 
+<!-- Debug information -->
+<div class="alert alert-info">
+    <strong>Debug Info:</strong> Check Visual Studio Output window for validation details
+</div>
+
+<!-- Display validation errors -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <h4>Validation Errors:</h4>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<!-- Display debug errors from ViewData -->
+@if (ViewData["ValidationErrors"] != null)
+{
+    <div class="alert alert-warning">
+        <h4>Debug Validation Errors:</h4>
+        <ul>
+            @foreach (var error in (List<string>)ViewData["ValidationErrors"])
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
 <form asp-action="Create">
+    <!-- Anti-forgery token is REQUIRED -->
+    @Html.AntiForgeryToken()
+
     <div class="form-group">
         <label asp-for="CategoryName" class="control-label"></label>
-        <input asp-for="CategoryName" class="form-control" />
+        <input asp-for="CategoryName" class="form-control" placeholder="Enter category name" />
         <span asp-validation-for="CategoryName" class="text-danger"></span>
     </div>
+
     <div class="form-group mt-3">
         <input type="submit" value="Create" class="btn btn-primary" />
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
+        <!-- Test button to bypass validation -->
+        <button type="button" class="btn btn-info" onclick="testSubmission()">Test Submit</button>
     </div>
 </form>
+
+@section Scripts {
+    <script>
+        function testSubmission() {
+            // Test with a simple value
+            document.getElementById('CategoryName').value = 'TestCategory';
+            document.forms[0].submit();
+        }
+    </script>
+}
